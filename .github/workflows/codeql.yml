@@ -35,15 +35,17 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         queries: security-extended,security-and-quality
+        # Exclude the Tests folder from being indexed/scanned
+        config: |
+          paths-ignore:
+            - 'GitHubActionDemo.Tests/**'
 
-    # Pointing to your specific solution file in the subfolder
     - name: Restore dependencies
-      run: dotnet restore GitHubActionDemo.API/GitHubActionDemo.API.sln
+      run: dotnet restore GitHubActionDemo.API/GitHubActionDemo.API.csproj
 
-    # Adding the flags to force a fresh, visible build
-    - name: Build solution
+    - name: Build API Project
       run: |
-        dotnet build GitHubActionDemo.API/GitHubActionDemo.API.sln \
+        dotnet build GitHubActionDemo.API/GitHubActionDemo.API.csproj \
         --configuration Release \
         --no-restore \
         --no-incremental \
