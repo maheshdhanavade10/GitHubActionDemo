@@ -25,7 +25,7 @@ namespace GitHubActionDemo.API.Controllers
             // ❌ Vulnerable: SQL Injection
             string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
 
-            using var conn = new SqlConnection("Server=.;Database=Test;Trusted_Connection=True;");
+            using var conn = new SqlConnection("Server=.;Database=Test;Trusted_Connection=True;Encrypt=True;");
             using var cmd = new SqlCommand(query, conn);
 
             conn.Open();
