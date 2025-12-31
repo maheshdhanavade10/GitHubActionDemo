@@ -1,12 +1,11 @@
 title = "Gitleaks Ruleset with Empty Structure Suppression"
 
 [allowlist]
-description = "Suppress false positives for empty or placeholder values"
+description = "Global allowlist to prevent false positives on empty placeholders"
 regexes = [
-  '''(?i)(Server\s*=\s*["']?["']?;\s*User\s*Id\s*=\s*["']?["']?;\s*Password\s*=\s*["']?["']?;)''',
-  '''(?i)(password\s*=\s*["']{0,1}["']{0,1})''',
-  '''(?i)(secret\s*=\s*["']{0,1}["']{0,1})''',
-  '''(?i)(connectionstring\s*=\s*["']{0,1}["']{0,1})'''
+    '''(?i)Password\s*=\s*["']?["']?;''',  # Matches Password=; or Password="";
+    '''(?i)"Default"\s*:\s*""''',         # Matches "Default": ""
+    '''(?i)"Password"\s*:\s*""'''         # Matches "Password": ""
 ]
 
 # =========================
@@ -14,28 +13,30 @@ regexes = [
 # =========================
 
 [[rules]]
-id = "connection-string"
-description = "Detect DB connection strings with credentials"
-regex = '''(?i)(Server\s*=\s*[^;]+;\s*User\s*Id\s*=\s*[^;]+;\s*Password\s*=\s*[^;]+;)'''
-tags = ["connectionstring", "database", "secret"]
+id = "connection-string-standard"
+description = "Detect inline DB connection strings with credentials"
+# Matches Password=... where the value is not empty
+regex = '''(?i)Password\s*=\s*[^"';\s]+'''
+keywords = ["password"]
+
+[[rules]]
+id = "json-default-connection"
+description = "Detect populated 'Default' connection string in JSON"
+# Matches "Default": "..." where the value is at least 1 character
+regex = '''(?i)"Default"\s*:\s*"([^"\s]+)"'''
+keywords = ["default"]
 
 [[rules]]
 id = "generic-password"
-description = "Detect hardcoded passwords"
-regex = '''(?i)(password\s*=\s*["'][^"']{6,}["'])'''
-tags = ["password", "secret"]
-
-[[rules]]
-id = "generic-secret"
-description = "Detect generic secret assignments"
-regex = '''(?i)(secret\s*=\s*["'][^"']{6,}["'])'''
-tags = ["secret", "generic"]
+description = "Detect hardcoded passwords (min 6 chars)"
+regex = '''(?i)password\s*=\s*["'][^"']{6,}["']'''
+keywords = ["password"]
 
 [[rules]]
 id = "aws-access-key"
 description = "Detect AWS Access Key IDs"
 regex = '''AKIA[0-9A-Z]{16}'''
-tags = ["aws", "key", "secret"]
+tags = ["aws", "key"]
 
 [[rules]]
 id = "aws-secret-key"
@@ -47,16 +48,19 @@ tags = ["aws", "secret"]
 id = "jwt-token"
 description = "Detect JWT tokens"
 regex = '''eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.([A-Za-z0-9_-]+)'''
-tags = ["jwt", "token"]
+tags = ["jwt"]
 
 [[rules]]
 id = "private-key"
 description = "Detect private key blocks"
 regex = '''-----BEGIN( RSA)? PRIVATE KEY-----'''
-tags = ["privatekey", "secret"]
+tags = ["privatekey"]
 
 [[rules]]
 id = "github-token"
 description = "Detect GitHub tokens"
 regex = '''ghp_[0-9A-Za-z]{36}'''
-tags = ["github", "token"]
+tags = ["github"]
+
+[extend]
+useDefault = true
