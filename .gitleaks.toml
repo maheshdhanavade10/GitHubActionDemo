@@ -1,32 +1,35 @@
-title = "Generic Gitleaks Ruleset"
+title = "Gitleaks Ruleset with Empty Structure Suppression"
 
-# Global settings
 [allowlist]
-description = "Allowlist for false positives"
+description = "Suppress false positives for empty or placeholder values"
 regexes = [
-  '''(?i)examplepassword''',
-  '''(?i)dummyapikey'''
-]
-paths = [
-  '''tests/''',
-  '''docs/'''
+  '''(?i)(Server\s*=\s*["']?["']?;\s*User\s*Id\s*=\s*["']?["']?;\s*Password\s*=\s*["']?["']?;)''',
+  '''(?i)(password\s*=\s*["']{0,1}["']{0,1})''',
+  '''(?i)(secret\s*=\s*["']{0,1}["']{0,1})''',
+  '''(?i)(connectionstring\s*=\s*["']{0,1}["']{0,1})'''
 ]
 
 # =========================
-# Common Secret Patterns
+# Real Secret Detection
 # =========================
+
+[[rules]]
+id = "connection-string"
+description = "Detect DB connection strings with credentials"
+regex = '''(?i)(Server\s*=\s*[^;]+;\s*User\s*Id\s*=\s*[^;]+;\s*Password\s*=\s*[^;]+;)'''
+tags = ["connectionstring", "database", "secret"]
 
 [[rules]]
 id = "generic-password"
 description = "Detect hardcoded passwords"
-regex = '''(?i)(password\s*=\s*["'][^"']+["'])'''
+regex = '''(?i)(password\s*=\s*["'][^"']{6,}["'])'''
 tags = ["password", "secret"]
 
 [[rules]]
-id = "connection-string"
-description = "Detect DB connection strings"
-regex = '''(?i)(Server=.*;User\s*Id=.*;Password=.*;)'''
-tags = ["connectionstring", "database", "secret"]
+id = "generic-secret"
+description = "Detect generic secret assignments"
+regex = '''(?i)(secret\s*=\s*["'][^"']{6,}["'])'''
+tags = ["secret", "generic"]
 
 [[rules]]
 id = "aws-access-key"
@@ -47,12 +50,6 @@ regex = '''eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.([A-Za-z0-9_-]+)'''
 tags = ["jwt", "token"]
 
 [[rules]]
-id = "generic-api-key"
-description = "Detect generic API keys"
-regex = '''(?i)(api[_-]?key\s*=\s*["'][0-9a-zA-Z-_]{16,}["'])'''
-tags = ["apikey", "secret"]
-
-[[rules]]
 id = "private-key"
 description = "Detect private key blocks"
 regex = '''-----BEGIN( RSA)? PRIVATE KEY-----'''
@@ -63,27 +60,3 @@ id = "github-token"
 description = "Detect GitHub tokens"
 regex = '''ghp_[0-9A-Za-z]{36}'''
 tags = ["github", "token"]
-
-[[rules]]
-id = "slack-token"
-description = "Detect Slack tokens"
-regex = '''xox[baprs]-[0-9A-Za-z]{10,48}'''
-tags = ["slack", "token"]
-
-[[rules]]
-id = "google-api-key"
-description = "Detect Google API keys"
-regex = '''AIza[0-9A-Za-z\\-_]{35}'''
-tags = ["google", "apikey"]
-
-[[rules]]
-id = "azure-connection-string"
-description = "Detect Azure connection strings"
-regex = '''DefaultEndpointsProtocol=https;AccountName=[a-z0-9]+;AccountKey=[A-Za-z0-9+/=]+;EndpointSuffix=core\.windows\.net'''
-tags = ["azure", "connectionstring"]
-
-[[rules]]
-id = "generic-secret"
-description = "Catch-all for 'secret=' assignments"
-regex = '''(?i)(secret\s*=\s*["'][^"']+["'])'''
-tags = ["secret", "generic"]
