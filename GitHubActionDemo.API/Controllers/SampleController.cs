@@ -34,5 +34,28 @@ namespace GitHubActionDemo.API.Controllers
             return Ok("Executed vulnerable SQL query");
         }
 
+        // ---------------------------------------------------------
+        // 2. Hardcoded Secret
+        // ---------------------------------------------------------
+        private const string ApiKey = "HARDCODED-SECRET-12345"; // ❌ Hardcoded secret
+
+        [HttpGet("secret")]
+        public IActionResult ShowSecret()
+        {
+            return Ok($"Secret is: {ApiKey}");
+        }
+
+        // ---------------------------------------------------------
+        // 3. Path Traversal
+        // ---------------------------------------------------------
+        [HttpGet("file")]
+        public IActionResult ReadFile(string filename)
+        {
+            // ❌ Vulnerable: User-controlled file path
+            string path = Path.Combine("C:\\data\\files", filename);
+            string content = System.IO.File.ReadAllText(path);
+
+            return Ok(content);
+        }
     }
 }
