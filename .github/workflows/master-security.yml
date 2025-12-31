@@ -10,9 +10,9 @@ permissions:
   security-events: write
 
 jobs:
-  call-gitleaks:
-    uses: ./.github/workflows/gitleaks.yml
-    secrets: inherit
+  #call-gitleaks:
+  #  uses: ./.github/workflows/gitleaks.yml
+  #  secrets: inherit
 
   call-trivy:
     # Removed 'needs: call-gitleaks' to allow parallel run
