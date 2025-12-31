@@ -1,58 +1,46 @@
-name: "CodeQL Advanced - ASP.NET Core 8.0"
+name: "CodeQL"
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  schedule:
-    - cron: '30 8 * * 1'
+  workflow_dispatch:
 
 jobs:
   analyze:
-    name: Analyze (${{ matrix.language }})
+    name: Analyze
     runs-on: ubuntu-latest
     permissions:
-      security-events: write
-      packages: read
       actions: read
       contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - language: csharp
-            build-mode: manual
+        language: [ 'csharp']
+        # Remove languages you don't use
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+          dotnet-version: '8.0.x'  
 
-      # Setup .NET 8 SDK for ASP.NET Core projects
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
 
-      # Initialize CodeQL
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
-          # Optionally add queries for extended security/quality checks
-          # queries: +security-extended,security-and-quality
+    - name: Restore dependencies
+      run: dotnet restore
 
-      # Manual build for ASP.NET Core 8.0
-      - name: Build ASP.NET Core 8.0 project
-        if: matrix.build-mode == 'manual'
-        run: |
-          dotnet restore
-          dotnet build --configuration Release
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
 
-      # Perform CodeQL Analysis
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:${{ matrix.language }}"
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
