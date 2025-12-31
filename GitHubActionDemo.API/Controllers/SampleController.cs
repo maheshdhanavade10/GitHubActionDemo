@@ -11,6 +11,7 @@ namespace GitHubActionDemo.API.Controllers
         [HttpGet("auth")]
         public IActionResult GetAuthTest()
         {
+            //OK
             return Ok(new { Message = "Auth test successful" });
         }
     }
