@@ -16,7 +16,7 @@ tags = ["azure", "storage", "key"]
 [[rules]]
 id = "connection-string"
 description = "SQL/NoSQL Connection Strings"
-regex = '''(?i)(Server=.*;(?:Database=.*;)?User Id=.*;Password=.*;)'''
+regex = '''(?i)(Server=[^;]+;(?:Database=[^;]+;)?User Id=[^;]+;Password=[^;]+;)'''
 tags = ["sql", "connection", "database"]
 
 [[rules]]
