@@ -19,29 +19,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp']
-        # Remove languages you don't use
+        language: [ 'csharp' ]
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    
+
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4 # Updated to v4
       with:
-          dotnet-version: '8.0.x'  
+        dotnet-version: '8.0.x'
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
+        # Recommended: use 'security-extended' for more thorough API scanning
+        queries: security-extended,security-and-quality 
 
     - name: Restore dependencies
       run: dotnet restore
 
-      # Add --no-incremental to ensure CodeQL "sees" the compilation
+    # IMPORTANT: CodeQL needs a clean build to index the code correctly
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore --no-incremental
+      run: |
+        dotnet build --configuration Release --no-restore --no-incremental
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
