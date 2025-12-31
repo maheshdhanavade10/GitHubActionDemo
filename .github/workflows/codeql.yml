@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           - language: csharp
-            build-mode: manual   # use manual build for .NET projects
+            build-mode: manual   # manual build for .NET projects
 
     steps:
       - name: Checkout repository
@@ -42,8 +42,12 @@ jobs:
           build-mode: ${{ matrix.build-mode }}
           queries: +security-extended,security-and-quality
 
+      # 👇 Manual build steps for C#
+      - name: Restore dependencies
+        run: dotnet restore ./YourSolution.sln
+
       - name: Build solution
-        run: dotnet build --configuration Release
+        run: dotnet build ./YourSolution.sln --configuration Release --no-restore
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
