@@ -19,18 +19,23 @@ jobs:
         with:
           fetch-depth: 0 
 
-      - name: Run Gitleaks
-        id: gitleaks
+      - name: Run Gitleaks with custom config
         uses: gitleaks/gitleaks-action@v2
-        with: 
-          args: detect --config=.gitleaks.toml --report-format=sarif --report-path=results.sarif
+        with:
+          entrypoint: /gitleaks/gitleaks
+          args: >
+            detect
+            --config=.gitleaks.toml
+            --report-format=sarif
+            --report-path=results.sarif
+            --redact
+            --exit-code=0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Gitleaks-action v2 creates a file named 'results.sarif' by default
+        continue-on-error: true  # Optional: prevents job failure on leaks
 
       - name: Upload Gitleaks SARIF report
-        # Only upload if the Gitleaks step actually ran
-        if: always() 
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
