@@ -1,10 +1,10 @@
 name: "Master Security Pipeline"
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
   workflow_dispatch:
 
 # These permissions are REQUIRED here to be inherited by the sub-workflows
