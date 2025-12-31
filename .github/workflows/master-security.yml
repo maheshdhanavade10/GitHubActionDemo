@@ -1,0 +1,26 @@
+name: "Master Security Pipeline"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  # 1. Run Gitleaks first (fastest, fails fast if secrets found)
+  call-gitleaks:
+    uses: ./.github/workflows/gitleaks.yml
+    secrets: inherit # Pass permissions/secrets to the sub-workflow
+
+  # 2. Run Trivy (SCA)
+  call-trivy:
+    needs: call-gitleaks
+    uses: ./.github/workflows/trivy.yml
+    secrets: inherit
+
+  # 3. Run CodeQL (SAST - usually the slowest)
+  call-codeql:
+    needs: call-trivy
+    uses: ./.github/workflows/codeql.yml
+    secrets: inherit
