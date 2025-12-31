@@ -26,7 +26,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4 # Updated to v4
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
@@ -34,16 +34,26 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
-        # Recommended: use 'security-extended' for more thorough API scanning
-        queries: security-extended,security-and-quality 
+        # Optional: Add queries for a deeper Web API scan
+        queries: security-extended,security-and-quality
+
+    - name: Clean solution
+      run: dotnet clean
 
     - name: Restore dependencies
       run: dotnet restore
 
-    # IMPORTANT: CodeQL needs a clean build to index the code correctly
+    # The fix for Exit Code 32:
+    # 1. -p:UseSharedCompilation=false prevents the background VBCSCompiler
+    # 2. -p:BuildInParallel=false ensures sequential tracking
+    # 3. --no-incremental forces a fresh build for CodeQL to index
     - name: Build solution
       run: |
-        dotnet build --configuration Release --no-restore --no-incremental
+        dotnet build --configuration Release \
+        -p:UseSharedCompilation=false \
+        -p:BuildInParallel=false \
+        --no-incremental \
+        --no-restore
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
