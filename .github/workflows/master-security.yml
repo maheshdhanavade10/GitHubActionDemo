@@ -7,19 +7,22 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+# These permissions are REQUIRED here to be inherited by the sub-workflows
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 jobs:
-  # 1. Run Gitleaks first (fastest, fails fast if secrets found)
   call-gitleaks:
     uses: ./.github/workflows/gitleaks.yml
-    secrets: inherit # Pass permissions/secrets to the sub-workflow
+    secrets: inherit
 
-  # 2. Run Trivy (SCA)
   call-trivy:
     needs: call-gitleaks
     uses: ./.github/workflows/trivy.yml
     secrets: inherit
 
-  # 3. Run CodeQL (SAST - usually the slowest)
   call-codeql:
     needs: call-trivy
     uses: ./.github/workflows/codeql.yml
