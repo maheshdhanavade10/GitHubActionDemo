@@ -34,26 +34,21 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
-        # Optional: Add queries for a deeper Web API scan
         queries: security-extended,security-and-quality
 
-    - name: Clean solution
-      run: dotnet clean
-
+    # Pointing to your specific solution file in the subfolder
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore GitHubActionDemo.API/GitHubActionDemo.API.sln
 
-    # The fix for Exit Code 32:
-    # 1. -p:UseSharedCompilation=false prevents the background VBCSCompiler
-    # 2. -p:BuildInParallel=false ensures sequential tracking
-    # 3. --no-incremental forces a fresh build for CodeQL to index
+    # Adding the flags to force a fresh, visible build
     - name: Build solution
       run: |
-        dotnet build --configuration Release \
-        -p:UseSharedCompilation=false \
-        -p:BuildInParallel=false \
+        dotnet build GitHubActionDemo.API/GitHubActionDemo.API.sln \
+        --configuration Release \
+        --no-restore \
         --no-incremental \
-        --no-restore
+        -p:UseSharedCompilation=false \
+        -p:BuildInParallel=false
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
