@@ -39,8 +39,9 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+      # Add --no-incremental to ensure CodeQL "sees" the compilation
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore --no-incremental
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
