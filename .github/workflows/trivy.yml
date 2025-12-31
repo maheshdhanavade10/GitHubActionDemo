@@ -3,8 +3,7 @@ name: Trivy Dependency Scan
 on:
   workflow_call:
   workflow_dispatch:
-  push:
-    branches: [ main ]
+  
 
 permissions:
   contents: read
@@ -18,29 +17,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # STEP 1: Setup .NET SDK (Required for restore)
+      # STEP 1: Setup .NET SDK
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x' # Match your project version (e.g., 6.0.x, 8.0.x)
+          dotnet-version: '8.0.x'
 
       # STEP 2: Restore dependencies 
-      # This creates the 'project.assets.json' files Trivy needs to see vulnerabilities
+      # This generates the 'obj/project.assets.json' file which Trivy actually scans.
       - name: Restore dependencies
         run: dotnet restore
 
       # STEP 3: Run Trivy scan
-      - name: Run Trivy vulnerability scanner (Repo scan)
+      - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
-          ignore-unfixed: true
+          # We remove ignore-unfixed to ensure we see the vulnerable Newtonsoft.Json
+          # even if a direct "fix" isn't applied to the current OS layer.
+          ignore-unfixed: false 
           format: 'sarif'
           output: 'trivy-results.sarif'
+          # CRITICAL/HIGH filter - Vulnerable Newtonsoft.Json versions often fall here.
           severity: 'CRITICAL,HIGH'
-          # Exit 0 ensures the pipeline doesn't break, but results still upload
-          exit-code: '0' 
+          exit-code: '0'
 
       # STEP 4: Upload to Security Tab
       - name: Upload Trivy results to GitHub Security tab
