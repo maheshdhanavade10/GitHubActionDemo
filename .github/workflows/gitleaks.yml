@@ -1,11 +1,15 @@
 name: Gitleaks Secret Scan
 
+#on:
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+#  workflow_dispatch:
+
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+  workflow_call:  # This allows the Master file to trigger this one
+  workflow_dispatch: # Allows manual testing
 
 jobs:
   scan:
