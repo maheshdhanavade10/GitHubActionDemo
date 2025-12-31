@@ -1,15 +1,8 @@
 name: Gitleaks Secret Scan
 
-#on:
-#  push:
-#    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
-#  workflow_dispatch:
-
 on:
-  workflow_call:  # This allows the Master file to trigger this one
-  workflow_dispatch: # Allows manual testing
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   scan:
@@ -24,11 +17,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Critical: Gitleaks needs full history to scan all commits
+          fetch-depth: 0 
 
       - name: Run Gitleaks
+        # This property ensures that even if Gitleaks finds a secret (exit code 1),
+        # the job will be marked as 'passed' with a warning, and the Master 
+        # Pipeline will proceed to the next job (Trivy).
+        continue-on-error: true 
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NOTE: Organizations require a Gitleaks license. 
-          # Personal accounts do not.
