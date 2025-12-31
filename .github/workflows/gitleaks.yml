@@ -22,6 +22,8 @@ jobs:
       - name: Run Gitleaks
         id: gitleaks
         uses: gitleaks/gitleaks-action@v2
+        with: 
+          config-path: .gitleaks.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Gitleaks-action v2 creates a file named 'results.sarif' by default
