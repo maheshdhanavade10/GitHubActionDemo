@@ -1,13 +1,9 @@
 name: "Master Security Pipeline"
 
 on:
-#  push:
-#    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
   workflow_dispatch:
 
-# These permissions are REQUIRED here to be inherited by the sub-workflows
+# Permissions remain at the top level to be inherited
 permissions:
   actions: read
   contents: read
@@ -19,11 +15,11 @@ jobs:
     secrets: inherit
 
   call-trivy:
-    needs: call-gitleaks
+    # Removed 'needs: call-gitleaks' to allow parallel run
     uses: ./.github/workflows/trivy.yml
     secrets: inherit
 
   call-codeql:
-    needs: call-trivy
+    # Removed 'needs: call-trivy' to allow parallel run
     uses: ./.github/workflows/codeql.yml
     secrets: inherit
